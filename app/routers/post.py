@@ -1,9 +1,9 @@
-from random import randrange
-from fastapi import APIRouter, HTTPException, Response, status
 from app.posts_db.post_data import my_posts
 from app.models.post import Post
+from fastapi import APIRouter, HTTPException, Response, status
+from random import randrange
 
-router = APIRouter(prefix="/posts")
+router = APIRouter(prefix="/posts", tags=["mock db"])
 
 
 def search_post(id: str):
@@ -11,7 +11,10 @@ def search_post(id: str):
     try:
         return list(posts)[0]
     except:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id: {id} was not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id: {id} was not found",
+        )
 
 
 def search_index(id: str):
@@ -69,7 +72,7 @@ def delete_post(id: str):
 @router.put("/{id}")
 def put_post(id: str, post: Post):
     index = search_index(id)
-    
+
     if index is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -77,8 +80,7 @@ def put_post(id: str, post: Post):
         )
 
     post_dict = post.dict()
-    post_dict['id'] = id
+    post_dict["id"] = id
     my_posts[index] = post_dict
 
     return {"post details": my_posts[index]}
-
