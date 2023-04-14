@@ -1,4 +1,4 @@
-from app.posts_db.post_data import my_posts
+from app.database.post_data import my_posts
 from app.models.post import Post
 from fastapi import APIRouter, HTTPException, Response, status
 from random import randrange
