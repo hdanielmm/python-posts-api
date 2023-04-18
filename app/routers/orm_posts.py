@@ -1,10 +1,11 @@
+from typing import List
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.database.orm_config import engine, get_db
 from sqlalchemy.orm import Session
 from app.models import ormpost as models
-from app.models.post import Post
+from app.models.schemas import Post, PostCreate
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -22,23 +23,23 @@ def error_404(id: int):
     )
 
 
-@router.get("/")
+@router.get("/", status_code=status.HTTP_200_OK, response_model=List[Post])
 def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.OrmPost).all()
 
-    return {"message": posts}
+    return posts
 
 
-@router.get("/{id}")
+@router.get("/{id}", status_code=status.HTTP_200_OK, response_model=Post)
 def get_post_by_id(id: int, db: Session = Depends(get_db)):
     # post = db.query(models.OrmPost).filter_by(id=id).first()
     post = db.query(models.OrmPost).filter(models.OrmPost.id == id).first()
 
-    return {"post details": post}
+    return post
 
 
-@router.post("/", response_model=None)
-def create_posts(post: Post, db: Session = Depends(get_db)):
+@router.post("/", response_model=Post)
+def create_posts(post: PostCreate, db: Session = Depends(get_db)):
     # new_post = models.OrmPost(
     #     title=post.title, content=post.content, published=post.published
     # )
@@ -49,7 +50,7 @@ def create_posts(post: Post, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_post)
 
-    return {"post details": new_post}
+    return new_post
 
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
 def delete_post(id: int, db: Session = Depends(get_db)):
@@ -68,8 +69,8 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     except Exception as e:
         print("Error: %s" % e)
 
-@router.put("/{id}")
-def update_post(id: str, post: Post, db: Session = Depends(get_db)):
+@router.put("/{id}", response_model=Post)
+def update_post(id: str, post: PostCreate, db: Session = Depends(get_db)):
     try:
         post_query = db.query(models.OrmPost).filter(models.OrmPost.id == id)
 
@@ -81,7 +82,7 @@ def update_post(id: str, post: Post, db: Session = Depends(get_db)):
 
         db.commit()
 
-        return {"post details": post_query.first()}
+        return post_query.first()
     except Error404:
         raise error_404(id)
     except Exception as e:

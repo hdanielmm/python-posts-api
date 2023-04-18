@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Response, status
 from psycopg2.extras import RealDictCursor
 
-from app.models.post import Post
+from app.models.schemas import Post
 
 
 router = APIRouter(prefix="/db-posts", tags=["postgresql"])
