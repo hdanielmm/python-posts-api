@@ -2,12 +2,11 @@ from typing import List
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from app.database.orm_config import engine, get_db
+from app.database.orm_config import get_db
 from sqlalchemy.orm import Session
 from app.models import ormpost as models
 from app.models.schemas import Post, PostCreate
 
-models.Base.metadata.create_all(bind=engine)
 
 router = APIRouter(prefix="/orm-posts", tags=["orm"])
 
