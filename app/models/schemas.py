@@ -25,7 +25,7 @@ class Post(PostBase):
 class UserBase(BaseModel):
     email: EmailStr
 
-    class Config():
+    class Config:
         orm_mode = True
 
 
@@ -37,6 +37,12 @@ class User(UserBase):
     id: int
     created_at: datetime
     disabled: bool | None
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
 
 class Token(BaseModel):
     access_token: str
