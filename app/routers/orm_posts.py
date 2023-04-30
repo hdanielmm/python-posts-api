@@ -36,12 +36,24 @@ def verify_author_post(owner_id: int, current_user_id: int):
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=List[Post])
 def get_posts(
-    db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+    limit: int = 5,
+    skip: int = 0,
+    search: str | None = "",
 ):
     # posts = db.query(models.OrmPost).all()
     # de
-    posts = db.query(models.OrmPost).filter(models.OrmPost.owner_id == current_user.id).all()
-
+    posts = (
+        db.query(models.OrmPost)
+        .filter(
+            models.OrmPost.owner_id == current_user.id,
+            models.OrmPost.title.contains(search),
+        )  # Brings out the owner posts
+        .limit(limit)
+        .offset(skip)
+        .all()
+    )
 
     return posts
 
@@ -56,8 +68,10 @@ def get_post_by_id(
     post = db.query(models.OrmPost).filter(models.OrmPost.id == id).first()
 
     if post is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id {id} not found")
-    
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id {id} not found"
+        )
+
     verify_author_post(post.owner_id, current_user.id)
 
     return post
@@ -119,7 +133,7 @@ def update_post(
 
         if post_query.first() is None:
             raise Error404()
-        
+
         verify_author_post(post_query.first().owner_id, current_user.id)
 
         # post_query.update({"title": "updated title", "content": "updated content", "published": True}, sinchronized_session=False)
