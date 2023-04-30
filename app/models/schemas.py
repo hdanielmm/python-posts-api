@@ -7,18 +7,13 @@ class PostBase(BaseModel):
     title: str
     content: str
     published: Optional[bool] = True
+    
 
     class Config:
         orm_mode = True
 
 
 class PostCreate(PostBase):
-    pass
-
-
-class Post(PostBase):
-    id: int
-    created_at: datetime
     pass
 
 
@@ -39,6 +34,13 @@ class User(UserBase):
     disabled: bool | None
 
 
+class Post(PostBase):
+    id: int
+    created_at: datetime
+    owner_id: int
+    owner: User
+
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
@@ -47,3 +49,6 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[str] = None

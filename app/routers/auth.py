@@ -16,18 +16,16 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
         user = db.query(ormpost.User).filter(ormpost.User.email == user_credentials.username).first()
 
         if user is None:
-        #    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Invalid credentials")
-            raise Error404()
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid credentials")
+            # raise Error404()
         
         if not verify_password(user_credentials.password, user.password):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Invalid credentials")
-    except Error404:
-        raise error_404(user_credentials.username)
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid credentials")
     except Exception as e:
         print("Error: %s" % e)
 
     # Create token
     # This is the data to put in the payload
-    access_token = oauth2.create_access_token(data = {"user.id": user.id})
+    access_token = oauth2.create_access_token(data = {"user_id": user.id})
     # Return token
     return {"access_token": access_token, "token_type": "bearer"}

@@ -7,6 +7,7 @@ from app.models import ormpost as models
 from app.models.schemas import User, UserCreate
 from app.routers.orm_posts import Error404, error_404
 from app.utils import get_password_hash
+from app import oauth2
 
 
 router = APIRouter(prefix="/users", tags=["user"])
@@ -28,7 +29,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=List[User])
-def get_user(db: Session = Depends(get_db)):
+def get_user(db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
     users = db.query(models.User).all()
 
     return users
