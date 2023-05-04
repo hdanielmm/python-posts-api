@@ -1,11 +1,11 @@
 from typing import List
-from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import func
 
 from app.database.orm_config import get_db
 from sqlalchemy.orm import Session
 from app.models import ormpost as models
-from app.models.schemas import Post, PostCreate
+from app.models.schemas import Post, PostCreate, PostVote
 from .. import oauth2
 
 
@@ -42,20 +42,43 @@ def get_posts(
     skip: int = 0,
     search: str | None = "",
 ):
+    # Brings all posts
+    posts = db.query(models.OrmPost).all()
+
+    # brings out the owner posts with parameters
+    # posts = (
+    #     db.query(models.OrmPost)
+    #     .filter(
+    #         models.OrmPost.owner_id == current_user.id,
+    #         models.OrmPost.title.contains(search),
+    #     )  # Brings out the owner posts
+    #     .limit(limit)
+    #     .offset(skip)
+    #     .all()
+    # )
+
+    return posts
+
+
+# @router.get("/join")
+@router.get("/join", status_code=status.HTTP_200_OK, response_model=List[PostVote])
+def get_posts_vote(
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+):
+    # Brings all posts
     # posts = db.query(models.OrmPost).all()
-    # de
-    posts = (
-        db.query(models.OrmPost)
-        .filter(
-            models.OrmPost.owner_id == current_user.id,
-            models.OrmPost.title.contains(search),
-        )  # Brings out the owner posts
-        .limit(limit)
-        .offset(skip)
+
+    post = (
+        db.query(models.OrmPost, func.count(models.Vote.post_id).label("votes"))
+        .join(models.Vote, models.Vote.post_id == models.OrmPost.id, isouter=True)
+        .group_by(models.OrmPost.id)
         .all()
     )
 
-    return posts
+    print(post)
+
+    return post
 
 
 @router.get("/{id}", status_code=status.HTTP_200_OK, response_model=Post)

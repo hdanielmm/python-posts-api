@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.routers import post, db_posts, orm_posts, users, auth
+from app.routers import post, db_posts, orm_posts, users, auth, votes
 
 from app.database.orm_config import engine
 from app.models import ormpost as models
@@ -15,6 +15,7 @@ app.include_router(db_posts.router)
 app.include_router(orm_posts.router)
 app.include_router(users.router)
 app.include_router(auth.router)
+app.include_router(votes.router)
 
 
 @app.get("/")
