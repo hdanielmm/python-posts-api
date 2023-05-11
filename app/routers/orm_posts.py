@@ -2,11 +2,11 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import func
 
-from app.database.orm_config import get_db
+from database.orm_config import get_db
 from sqlalchemy.orm import Session
-from app.models import ormpost as models
-from app.models.schemas import Post, PostCreate, PostVote
-from .. import oauth2
+from models import ormpost as models
+from models.schemas import Post, PostCreate, PostVote
+from oauth2 import get_current_user
 
 
 router = APIRouter(prefix="/orm-posts", tags=["orm"])
@@ -37,7 +37,7 @@ def verify_author_post(owner_id: int, current_user_id: int):
 @router.get("/", status_code=status.HTTP_200_OK, response_model=List[Post])
 def get_posts(
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(get_current_user),
     limit: int = 5,
     skip: int = 0,
     search: str | None = "",
@@ -60,11 +60,11 @@ def get_posts(
     return posts
 
 
-# @router.get("/join")
-@router.get("/join", status_code=status.HTTP_200_OK, response_model=List[PostVote])
+# @router.get("/join", status_code=status.HTTP_200_OK, response_model=List[PostVote])
+@router.get("/join")
 def get_posts_vote(
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(get_current_user),
 ):
     # Brings all posts
     # posts = db.query(models.OrmPost).all()
@@ -85,7 +85,7 @@ def get_posts_vote(
 def get_post_by_id(
     id: int,
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(get_current_user),
 ):
     # post = db.query(models.OrmPost).filter_by(id=id).first()
     post = db.query(models.OrmPost).filter(models.OrmPost.id == id).first()
@@ -104,7 +104,7 @@ def get_post_by_id(
 def create_posts(
     post: PostCreate,
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(get_current_user),
 ):
     # new_post = models.OrmPost(
     #     title=post.title, content=post.content, published=post.published
@@ -123,7 +123,7 @@ def create_posts(
 def delete_post(
     id: int,
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(get_current_user),
 ):
     try:
         post_query = db.query(models.OrmPost).filter(models.OrmPost.id == id)
@@ -149,7 +149,7 @@ def update_post(
     id: str,
     post: PostCreate,
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(get_current_user),
 ):
     try:
         post_query = db.query(models.OrmPost).filter(models.OrmPost.id == id)

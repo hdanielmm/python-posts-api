@@ -1,13 +1,13 @@
 from dotenv import load_dotenv
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from .models import schemas
+from models import schemas
 from fastapi import status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
-from app.database.orm_config import get_db
+from database.orm_config import get_db
 from sqlalchemy.orm import Session
-from app.models import ormpost as models
-from .config import settings
+from models import ormpost as models
+from config import settings
 import os
 
 load_dotenv()

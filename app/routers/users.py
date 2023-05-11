@@ -1,13 +1,13 @@
 from typing import List
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from app.database.orm_config import get_db
-from app.models import ormpost as models
+from database.orm_config import get_db
+from models import ormpost as models
 
-from app.models.schemas import User, UserCreate
-from app.routers.orm_posts import Error404, error_404
-from app.utils import get_password_hash
-from app import oauth2
+from models.schemas import User, UserCreate
+from routers.orm_posts import Error404, error_404
+from utils import get_password_hash
+from oauth2 import get_current_user
 
 
 router = APIRouter(prefix="/users", tags=["user"])
@@ -29,7 +29,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=List[User])
-def get_user(db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)):
+def get_user(db: Session = Depends(get_db), get_current_user: int = Depends(get_current_user)):
     users = db.query(models.User).all()
 
     return users

@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr, conint
-
+from pydantic import BaseModel, EmailStr
+from pydantic.types import conint
 
 class PostBase(BaseModel):
     title: str
     content: str
-    published: Optional[bool] = True
+    published: bool = True
 
-    class Config:
-        orm_mode = True
+    # class Config:
+    #     orm_mode = True
 
 
 class PostCreate(PostBase):
@@ -19,8 +19,8 @@ class PostCreate(PostBase):
 class UserBase(BaseModel):
     email: EmailStr
 
-    class Config:
-        orm_mode = True
+    # class Config:
+    #     orm_mode = True
 
 
 class UserCreate(UserBase):
@@ -30,7 +30,10 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     created_at: datetime
-    disabled: bool | None
+    # disabled: bool | None
+
+    class Config:
+        orm_mode = True
 
 
 class Post(PostBase):
@@ -38,10 +41,14 @@ class Post(PostBase):
     created_at: datetime
     owner_id: int
     owner: User
+    title: str
+    content: str
 
+    class Config:
+        orm_mode = True
 
-class PostVote(BaseModel):
-    Post: Post
+class PostVote(PostBase):
+    post: list[Post] = []
     votes: int
 
     class Config:

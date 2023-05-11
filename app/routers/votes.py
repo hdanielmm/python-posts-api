@@ -1,11 +1,11 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app import oauth2
-from app.models.schemas import Vote
-from ..models import ormpost as models
+from oauth2 import get_current_user
+from models.schemas import Vote
+from models import ormpost as models
 
-from app.database.orm_config import get_db
+from database.orm_config import get_db
 
 
 router = APIRouter(prefix="/votes", tags=["Votes"])
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/votes", tags=["Votes"])
 def create_vote(
     vote: Vote,
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user),
+    current_user: int = Depends(get_current_user),
 ):
     vote_query = db.query(models.Vote).filter(
         models.Vote.post_id == vote.post_id, models.Vote.user_id == current_user.id
